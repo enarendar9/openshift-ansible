@@ -27,6 +27,22 @@
     calico_etcd_endpoints: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls | join(',') }}"
     calico_etcd_cert_dir: "/etc/origin/calico/"
 
+- name: Calico Master | Create Calico CNI binary directory on Atomic hosts
+  when: openshift.common.is_atomic | bool
+  file:
+    path: /var/usrlocal/cni/bin
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+    recurse: yes
+
+- name: Set Calico CNI binary directory on Atomic hosts
+  when: openshift.common.is_atomic | bool
+  set_fact:
+    cni_bin_dir: /var/usrlocal/cni/bin
+    calicoctl_bin_dir: /var/usrlocal/bin
+
 - name: Calico Node | Error if no certs set.
   fail:
     msg: "Invalid etcd configuration for calico."
@@ -46,8 +62,15 @@
   - "{{ calico_etcd_key_file }}"
 
 - name: Calico Node | Configure Calico service unit file
+  when: not openshift.common.is_atomic | bool
   template:
     dest: "/lib/systemd/system/calico.service"
+    src: calico.service.j2
+
+- name: Calico Node | Configure Calico service unit file for Atomic hosts
+  when: openshift.common.is_atomic | bool
+  template:
+    dest: "/etc/systemd/system/calico.service"
     src: calico.service.j2
 
 - name: Calico Node | Enable calico
@@ -67,7 +90,7 @@
   become: yes
   template:
     src: "10-calico.conf.j2"
-    dest: "{{ cni_conf_dir }}/10-calico.conf"
+    dest: "{{ cni_conf_dir }}10-calico.conf"
 
 - name: Calico Node | Assures Kuberentes CNI bin dir exists
   become: yes

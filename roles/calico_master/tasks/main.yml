@@ -7,6 +7,22 @@
   - "{{ calico_etcd_cert_file }}"
   - "{{ calico_etcd_key_file }}"
 
+- name: Calico Master | Create Calico CNI binary directory on Atomic hosts
+  when: openshift.common.is_atomic | bool
+  file:
+    path: /var/usrlocal/cni/bin
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+    recurse: yes
+
+- name: Set Calico CNI binary directory on Atomic hosts
+  when: openshift.common.is_atomic | bool
+  set_fact:
+    cni_bin_dir: /var/usrlocal/cni/bin
+    calicoctl_bin_dir: /var/usrlocal/bin
+
 - name: Calico Master | Create temp directory for policy controller definition
   command: mktemp -d /tmp/openshift-ansible-XXXXXXX
   register: mktemp

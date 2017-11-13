@@ -34,6 +34,7 @@ ExecStart=/usr/bin/docker run --name {{ openshift.common.service_type }}-node \
   -v /usr/bin/docker:/usr/bin/docker:ro -v /var/lib/docker:/var/lib/docker \
   -v /lib/modules:/lib/modules -v /etc/origin/openvswitch:/etc/openvswitch \
   -v /etc/origin/sdn:/etc/openshift-sdn -v /var/lib/cni:/var/lib/cni \
+  -v /etc/origin/calico:/etc/origin/calico -v /etc/cni/net.d:/etc/cni/net.d -v /var/usrlocal/cni/bin:/opt/cni/bin -v /var/usrlocal/cni/bin:/var/usrlocal/cni/bin \
   -v /etc/systemd/system:/host-etc/systemd/system -v /var/log:/var/log \
   {% if openshift_use_nuage | default(false) -%} $NUAGE_ADDTL_BIND_MOUNTS {% endif -%} \
   -v /dev:/dev $DOCKER_ADDTL_BIND_MOUNTS -v /etc/pki:/etc/pki:ro \
